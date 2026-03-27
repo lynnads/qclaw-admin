@@ -117,30 +117,30 @@ const server = http.createServer((req, res) => {
   }
 
   // API: 获取文件夹列表
-if (pathname === '/api/folders/list' && req.method === 'GET') {
-  const basePath = query.path || 'D:\\'
-  
-  try {
-    if (!fs.existsSync(basePath)) {
-      return sendJSON(res, 404, { code: 404, message: '路径不存在', data: null })
+  if (pathname === '/api/folders/list' && req.method === 'GET') {
+    const basePath = query.path || 'D:\\'  
+    
+    try {
+      if (!fs.existsSync(basePath)) {
+        return sendJSON(res, 404, { code: 404, message: '路径不存在', data: null })
+      }
+      
+      const entries = fs.readdirSync(basePath, { withFileTypes: true })
+      const folders = entries
+        .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
+        .map(entry => path.join(basePath, entry.name))
+        .sort()
+      
+      sendJSON(res, 200, {
+        code: 200,
+        message: '获取成功',
+        data: { folders }
+      })
+    } catch (e) {
+      sendJSON(res, 500, { code: 500, message: e.message, data: null })
     }
-    
-    const entries = fs.readdirSync(basePath, { withFileTypes: true })
-    const folders = entries
-      .filter(entry => entry.isDirectory() && !entry.name.startsWith('.'))
-      .map(entry => path.join(basePath, entry.name))
-      .sort()
-    
-    sendJSON(res, 200, {
-      code: 200,
-      message: '获取成功',
-      data: { folders }
-    })
-  } catch (e) {
-    sendJSON(res, 500, { code: 500, message: e.message, data: null })
+    return
   }
-  return
-}
   if (pathname === '/api/projects/scan' && req.method === 'GET') {
     const basePath = query.path || 'D:\\workProject'
     
