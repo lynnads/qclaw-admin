@@ -43,6 +43,11 @@ const routes: RouteRecordRaw[] = [
         path: 'github',
         component: () => import('@/views/GithubTrending.vue'),
         meta: { title: 'GitHub趋势', icon: 'Link' }
+      },
+      {
+        path: 'ai-assistant',
+        component: () => import('@/views/AiAssistant/index.vue'),
+        meta: { title: 'AI助手', icon: 'Bot' }
       }
       // 后续新增页面，可在此处添加子路由
     ]
