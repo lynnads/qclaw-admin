@@ -85,8 +85,8 @@ const filterPackageManager = ref('')
 
 // 计算属性
 const frameworks = computed(() => {
-  const set = new Set(projectStore.projects.map(p => p.framework))
-  return Array.from(set).sort()
+  const arr = projectStore.projects.map(p => p.framework).filter((f): f is string => Boolean(f))
+  return [...new Set(arr)].sort()
 })
 
 const frameworkOptions = computed(() => [
@@ -109,7 +109,7 @@ const filteredProjects = computed(() => {
     const keyword = searchKeyword.value.toLowerCase()
     projects = projects.filter(p =>
       p.name.toLowerCase().includes(keyword) ||
-      p.path.toLowerCase().includes(keyword)
+      (p.path && p.path.toLowerCase().includes(keyword))
     )
   }
 
@@ -146,7 +146,7 @@ const scanProjects = async () => {
 
 const handleInstall = async (project: Project) => {
   try {
-    await projectStore.installDeps(project.path, project.packageManager)
+    await projectStore.installDeps(project.path || '', project.packageManager || 'npm')
     uiStore.showSuccess(`${project.name} 依赖安装完成`)
   } catch (error) {
     uiStore.showError(`${project.name} 依赖安装失败`)
@@ -155,7 +155,7 @@ const handleInstall = async (project: Project) => {
 
 const handleRun = async (project: Project) => {
   try {
-    await projectStore.runProject(project.path, project.packageManager)
+    await projectStore.runProject(project.path || '', project.packageManager || 'npm')
     uiStore.showSuccess(`${project.name} 已启动`)
   } catch (error) {
     uiStore.showError(`${project.name} 启动失败`)
@@ -164,7 +164,7 @@ const handleRun = async (project: Project) => {
 
 const handleStop = async (project: Project) => {
   try {
-    await projectStore.stopProject(project.path)
+    await projectStore.stopProject(project.path || '')
     uiStore.showInfo(`${project.name} 已停止`)
   } catch (error) {
     uiStore.showError(`${project.name} 停止失败`)

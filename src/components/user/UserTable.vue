@@ -42,11 +42,11 @@
           </tr>
           <tr v-for="user in users" :key="user.id" class="user-row">
             <td>
-              <input type="checkbox" class="checkbox" :value="user.id" :checked="selectedIds.includes(user.id)" @change="emit('toggleSelect', user.id)" />
+              <input type="checkbox" class="checkbox" :value="user.id" :checked="(selectedIds as (string | number)[]).includes(user.id)" @change="emit('toggleSelect', user.id)" />
             </td>
             <td>
               <div class="user-info">
-                <div class="user-avatar">{{ user.name.charAt(0) }}</div>
+                <div class="user-avatar">{{ (user.name || user.username || 'U').charAt(0) }}</div>
                 <div class="user-details">
                   <p class="user-name">{{ user.name }}</p>
                   <p class="user-email">{{ user.email }}</p>
@@ -61,7 +61,7 @@
                 {{ user.status === 'active' ? '正常' : '禁用' }}
               </span>
             </td>
-            <td class="text-white/35 text-xs">{{ user.createTime }}</td>
+            <td class="text-white/35 text-xs">{{ user.createdAt || user.createTime }}</td>
             <td>
               <div class="action-buttons">
                 <button @click="$emit('edit', user)" class="action-btn edit">
@@ -130,7 +130,7 @@ interface Props {
   total: number
   currentPage: number
   pageSize: number
-  selectedIds: number[]
+  selectedIds: (number | string)[]
 }
 
 const props = defineProps<Props>()
@@ -141,7 +141,7 @@ const emit = defineEmits<{
   delete: [user: User]
   pageChange: [page: number]
   selectAll: [selected: boolean]
-  toggleSelect: [id: number]
+  toggleSelect: [id: number | string]
 }>()
 
 const totalPages = computed(() => Math.ceil(props.total / props.pageSize))

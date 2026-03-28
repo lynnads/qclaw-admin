@@ -1,79 +1,86 @@
-// 项目类型定义
-export interface Project {
+// 用户类型
+export interface User {
+  id: string | number
   name: string
-  path: string
-  nodeVersion: string
-  depsInstalled: boolean
-  packageManager: 'npm' | 'pnpm' | 'yarn'
-  version: string
-  framework: string
-  installing?: boolean
-  running?: boolean
-  pid?: number
-  port?: number
+  username?: string
+  email: string
+  avatar?: string
+  role?: string
+  status?: 'active' | 'disabled'
+  createdAt?: string
+  createTime?: string  // 兼容字段别名
+  updatedAt?: string
 }
 
-export interface ScanResult {
+// 项目类型
+export interface Project {
+  id: string
+  name: string
+  path?: string
+  description?: string
+  owner?: string
+  framework?: string
+  packageManager?: string
+  depsInstalled?: boolean
+  running?: boolean
+  nodeVersion?: string
+  port?: number
+  pid?: number
+  installing?: boolean
+  status?: 'active' | 'inactive' | 'archived'
+  createdAt?: string
+  updatedAt?: string
+}
+
+// API 响应类型
+export interface ApiResponse<T = any> {
   code: number
   message: string
-  data: {
+  data?: T
+}
+
+// 用户列表响应
+export interface UserListResponse {
+  list: User[]
+  users?: User[]
+  total: number
+  page?: number
+  pageSize?: number
+}
+
+// 项目扫描结果
+export interface ScanResult extends ApiResponse {
+  data?: {
     projects: Project[]
     total: number
   }
 }
 
-export interface ApiResponse<T = any> {
-  code: number
-  message: string
-  data: T
-}
-
-// 用户角色和状态类型
-export type UserRole = '管理员' | '用户' | '访客'
-export type UserStatus = 'active' | 'disabled'
-
-// 用户类型
-export interface User {
-  id: number
-  name: string
-  email: string
-  role: UserRole
-  status: UserStatus
-  createTime: string
-}
-
-export interface UserListResponse {
-  list: User[]
-  total: number
+// 分页类型
+export interface PaginationParams {
   page: number
   pageSize: number
+  total?: number
 }
 
-// 登录类型
+// 登录请求类型
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+// 登录响应类型
+export interface LoginResponse {
+  token: string
+  userInfo?: User
+  user?: User
+}
+
+// 登录参数
 export interface LoginParams {
   username: string
   password: string
   remember?: boolean
-}
-
-export interface LoginResponse {
-  token: string
-  userInfo: {
-    id: number
-    name: string
-    role: string
-  }
-}
-
-// UI 状态类型
-export interface UiState {
-  sidebarCollapsed: boolean
-  theme: 'dark' | 'light'
-  loading: {
-    scanning: boolean
-    installing: boolean
-    running: boolean
-  }
 }
 
 // 通知类型
@@ -83,3 +90,4 @@ export interface Notification {
   message: string
   duration?: number
 }
+

@@ -114,7 +114,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const emit = defineEmits<{
+defineEmits<{
   install: [project: Project]
   run: [project: Project]
   stop: [project: Project]
@@ -122,10 +122,10 @@ const emit = defineEmits<{
 
 const truncatedPath = computed(() => {
   const path = props.project.path
-  if (path.length > 40) {
+  if (path && path.length > 40) {
     return '...' + path.slice(-37)
   }
-  return path
+  return path || ''
 })
 
 const frameworkColor = computed(() => {
@@ -137,7 +137,7 @@ const frameworkColor = computed(() => {
     Angular: 'linear-gradient(135deg, #dd0031 0%, #c3002f 100%)',
     Svelte: 'linear-gradient(135deg, #ff3e00 0%, #ff8c00 100%)',
   }
-  return colors[props.project.framework] || 'linear-gradient(135deg, #7b2ff7 0%, #00d9ff 100%)'
+  return colors[props.project.framework || ''] || 'linear-gradient(135deg, #7b2ff7 0%, #00d9ff 100%)'
 })
 
 const openInBrowser = (port: number) => {

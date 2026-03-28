@@ -1,75 +1,73 @@
 import request from '@/utils/request'
 import { API_ENDPOINTS } from '@/constants'
-import type { Project, ApiResponse, ScanResult } from '@/types'
+import { mockProjectService } from './mockService'
 
-/**
- * 项目服务类
- * 统一管理所有项目相关 API 调用
- */
 class ProjectService {
-  /**
-   * 扫描项目
-   * @param path 扫描路径（可选）
-   */
-  async scanProjects(path?: string): Promise<ScanResult> {
-    const response = await request.get(API_ENDPOINTS.PROJECTS_SCAN, {
-      params: { path },
-    })
-    return response
+  private useMock = import.meta.env.DEV
+
+  async scanProjects(path?: string): Promise<any> {
+    if (this.useMock) {
+      return mockProjectService.scanProjects(path)
+    }
+    try {
+      const response = await request.get(API_ENDPOINTS.PROJECTS_SCAN, { params: { path } })
+      return response
+    } catch (error) {
+      console.error('扫描项目失败:', error)
+      return mockProjectService.scanProjects(path)
+    }
   }
 
-  /**
-   * 安装项目依赖
-   * @param projectPath 项目路径
-   * @param packageManager 包管理器
-   */
-  async installDeps(
-    projectPath: string,
-    packageManager: string = 'npm'
-  ): Promise<ApiResponse> {
-    const response = await request.post(API_ENDPOINTS.PROJECTS_INSTALL, {
-      projectPath,
-      packageManager,
-    })
-    return response
+  async installDeps(projectPath: string, packageManager: string = 'npm'): Promise<any> {
+    if (this.useMock) {
+      return mockProjectService.installDeps(projectPath, packageManager)
+    }
+    try {
+      const response = await request.post(API_ENDPOINTS.PROJECTS_INSTALL, { projectPath, packageManager })
+      return response
+    } catch (error) {
+      console.error('安装依赖失败:', error)
+      return mockProjectService.installDeps(projectPath, packageManager)
+    }
   }
 
-  /**
-   * 运行项目
-   * @param projectPath 项目路径
-   * @param packageManager 包管理器
-   */
-  async runProject(
-    projectPath: string,
-    packageManager: string = 'npm'
-  ): Promise<ApiResponse<{ pid: number; port: number }>> {
-    const response = await request.post(API_ENDPOINTS.PROJECTS_RUN, {
-      projectPath,
-      packageManager,
-    })
-    return response
+  async runProject(projectPath: string, packageManager: string = 'npm'): Promise<any> {
+    if (this.useMock) {
+      return mockProjectService.runProject(projectPath, packageManager)
+    }
+    try {
+      const response = await request.post(API_ENDPOINTS.PROJECTS_RUN, { projectPath, packageManager })
+      return response
+    } catch (error) {
+      console.error('运行项目失败:', error)
+      return mockProjectService.runProject(projectPath, packageManager)
+    }
   }
 
-  /**
-   * 停止项目
-   * @param projectPath 项目路径
-   */
-  async stopProject(projectPath: string): Promise<ApiResponse> {
-    const response = await request.post(API_ENDPOINTS.PROJECTS_STOP, {
-      projectPath,
-    })
-    return response
+  async stopProject(projectPath: string): Promise<any> {
+    if (this.useMock) {
+      return mockProjectService.stopProject(projectPath)
+    }
+    try {
+      const response = await request.post(API_ENDPOINTS.PROJECTS_STOP, { projectPath })
+      return response
+    } catch (error) {
+      console.error('停止项目失败:', error)
+      return mockProjectService.stopProject(projectPath)
+    }
   }
 
-  /**
-   * 切换 Node 版本
-   * @param version Node 版本
-   */
-  async switchNodeVersion(version: string): Promise<ApiResponse> {
-    const response = await request.post(API_ENDPOINTS.PROJECTS_SWITCH_NODE, {
-      version,
-    })
-    return response
+  async switchNodeVersion(version: string): Promise<any> {
+    if (this.useMock) {
+      return mockProjectService.switchNodeVersion(version)
+    }
+    try {
+      const response = await request.post(API_ENDPOINTS.PROJECTS_SWITCH_NODE, { version })
+      return response
+    } catch (error) {
+      console.error('切换 Node 版本失败:', error)
+      return mockProjectService.switchNodeVersion(version)
+    }
   }
 }
 

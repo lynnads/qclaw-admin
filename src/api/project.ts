@@ -61,7 +61,7 @@ export const mockScanProjects = async () => {
 }
 
 // Mock API：安装依赖
-export const mockInstallDeps = async (projectPath: string, packageManager: string = 'npm') => {
+export const mockInstallDeps = async (_projectPath: string, _packageManager: string = 'npm') => {
   await delay(2000)
   
   // 模拟安装成功
@@ -73,7 +73,7 @@ export const mockInstallDeps = async (projectPath: string, packageManager: strin
 }
 
 // Mock API：运行项目
-export const mockRunProject = async (projectPath: string, packageManager: string = 'npm') => {
+export const mockRunProject = async (_projectPath: string, _packageManager: string = 'npm') => {
   await delay(1500)
   
   // 模拟运行成功

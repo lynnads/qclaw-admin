@@ -121,13 +121,13 @@ const filterRole = ref('')
 const filterStatus = ref('')
 
 // 选中项
-const selectedIds = ref<number[]>([])
+const selectedIds = ref<(number | string)[]>([])
 
 // 弹窗状态
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
 const isEditing = ref(false)
-const editingId = ref<number | null>(null)
+const editingId = ref<number | string | null>(null)
 const deleteTarget = ref<User | null>(null)
 
 // 表单数据
@@ -162,29 +162,6 @@ const totalPages = computed(() => Math.ceil(total.value / pageSize))
 
 const paginatedUsers = computed(() => tableData.value)
 
-const displayedPages = computed(() => {
-  const pages: number[] = []
-  const t = totalPages.value
-  const c = currentPage.value
-  
-  if (t <= 5) {
-    for (let i = 1; i <= t; i++) pages.push(i)
-  } else if (c <= 3) {
-    pages.push(1, 2, 3, 4, 5)
-  } else if (c >= t - 2) {
-    for (let i = t - 4; i <= t; i++) pages.push(i)
-  } else {
-    for (let i = c - 2; i <= c + 2; i++) pages.push(i)
-  }
-  
-  return pages
-})
-
-const isAllSelected = computed(() =>
-  paginatedUsers.value.length > 0 &&
-  paginatedUsers.value.every(u => selectedIds.value.includes(u.id))
-)
-
 // 方法
 const loadData = async () => {
   isLoading.value = true
@@ -198,10 +175,12 @@ const loadData = async () => {
     })
     
     if (response.code === 200) {
-      tableData.value = response.data.list
-      total.value = response.data.total
+      // 兼容 list 和 users 两种字段名
+      tableData.value = response.data?.list || response.data?.users || []
+      total.value = response.data?.total || 0
     }
   } catch (error) {
+    console.error('加载用户列表失败:', error)
     uiStore.showError('加载用户列表失败')
   } finally {
     isLoading.value = false
@@ -222,7 +201,7 @@ const handleSelectAll = (selected: boolean) => {
   }
 }
 
-const handleToggleSelect = (id: number) => {
+const handleToggleSelect = (id: number | string) => {
   const index = selectedIds.value.indexOf(id)
   if (index > -1) {
     selectedIds.value.splice(index, 1)
@@ -242,7 +221,12 @@ const openAddModal = () => {
 const openEditModal = (user: User) => {
   isEditing.value = true
   editingId.value = user.id
-  form.value = { ...user }
+  form.value = { 
+    name: user.name || '',
+    email: user.email || '',
+    role: user.role || '用户',
+    status: user.status || 'active'
+  }
   formErrors.value = { name: '', email: '' }
   showModal.value = true
 }
@@ -269,7 +253,7 @@ const submitForm = async () => {
 
   try {
     if (isEditing.value && editingId.value) {
-      await userService.editUser(editingId.value, form.value)
+      await userService.editUser(editingId.value as number | string, form.value)
       uiStore.showSuccess('用户保存成功')
     } else {
       await userService.addUser(form.value)

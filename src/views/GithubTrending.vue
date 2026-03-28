@@ -70,7 +70,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { web_fetch } from '@/utils/request'
 
 interface Repo {
   id: number

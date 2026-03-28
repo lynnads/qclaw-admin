@@ -36,7 +36,7 @@ export const useProjectStore = defineStore('project', () => {
   const getCache = (key: string) => {
     const item = cache.value.get(key)
     if (!item) return null
-    if (Date.now() - item.timestamp > 5 * 60 * 1000) { // 5分钟过期
+    if (Date.now() - item.timestamp > 5 * 60 * 1000) {
       cache.value.delete(key)
       return null
     }
@@ -57,20 +57,20 @@ export const useProjectStore = defineStore('project', () => {
       const cached = getCache(cacheKey)
       
       if (cached) {
-        projects.value = cached.projects
-        total.value = cached.total
+        projects.value = cached.projects || []
+        total.value = cached.total || 0
         return cached
       }
 
       const response = await projectService.scanProjects(path)
       
-      if (response.code === 200) {
-        projects.value = response.data.projects
-        total.value = response.data.total
+      if (response.code === 200 && response.data) {
+        projects.value = response.data.projects || []
+        total.value = response.data.total || 0
         setCache(cacheKey, response.data)
         return response.data
       } else {
-        throw new Error(response.message)
+        throw new Error(response.message || '扫描失败')
       }
     } catch (err) {
       error.value = err instanceof Error ? err.message : '扫描失败'
@@ -88,7 +88,6 @@ export const useProjectStore = defineStore('project', () => {
       const response = await projectService.installDeps(projectPath, packageManager)
       
       if (response.code === 200) {
-        // 更新项目状态
         const index = projects.value.findIndex(p => p.path === projectPath)
         if (index !== -1) {
           projects.value[index].depsInstalled = true
@@ -96,7 +95,7 @@ export const useProjectStore = defineStore('project', () => {
         }
         return response
       } else {
-        throw new Error(response.message)
+        throw new Error(response.message || '安装失败')
       }
     } catch (err) {
       if (project) project.installing = false
@@ -115,12 +114,12 @@ export const useProjectStore = defineStore('project', () => {
         const index = projects.value.findIndex(p => p.path === projectPath)
         if (index !== -1) {
           projects.value[index].running = true
-          projects.value[index].pid = response.data.pid
-          projects.value[index].port = response.data.port
+          projects.value[index].pid = response.data?.pid
+          projects.value[index].port = response.data?.port
         }
         return response
       } else {
-        throw new Error(response.message)
+        throw new Error(response.message || '运行失败')
       }
     } catch (err) {
       if (project) project.running = false
@@ -144,7 +143,7 @@ export const useProjectStore = defineStore('project', () => {
         }
         return response
       } else {
-        throw new Error(response.message)
+        throw new Error(response.message || '停止失败')
       }
     } catch (err) {
       if (project) project.running = true
@@ -157,13 +156,12 @@ export const useProjectStore = defineStore('project', () => {
       const response = await projectService.switchNodeVersion(version)
       
       if (response.code === 200) {
-        // 更新所有项目的 Node 版本
         projects.value.forEach(project => {
           project.nodeVersion = version
         })
         return response
       } else {
-        throw new Error(response.message)
+        throw new Error(response.message || '切换版本失败')
       }
     } catch (err) {
       throw err
@@ -176,9 +174,9 @@ export const useProjectStore = defineStore('project', () => {
     
     const lowerKeyword = keyword.toLowerCase()
     return projects.value.filter(project => 
-      project.name.toLowerCase().includes(lowerKeyword) ||
-      project.path.toLowerCase().includes(lowerKeyword) ||
-      project.framework.toLowerCase().includes(lowerKeyword)
+      project.name?.toLowerCase().includes(lowerKeyword) ||
+      project.path?.toLowerCase().includes(lowerKeyword) ||
+      project.framework?.toLowerCase().includes(lowerKeyword)
     )
   }
 

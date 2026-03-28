@@ -1,68 +1,80 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-const routes = [
+// 定义路由类型，符合TS规范
+const routes: RouteRecordRaw[] = [
+  // 登录页：单独路由，无需嵌套布局
   {
     path: '/login',
-    name: 'Login',
     component: () => import('@/views/Login.vue'),
-    meta: { requiresAuth: false },
+    meta: {
+      hidden: true,
+      title: '登录'
+    }
   },
+  // 主布局：所有后台页面嵌套在此布局下（包含侧边栏、头部）
   {
     path: '/',
     component: () => import('@/layout/Layout.vue'),
-    meta: { requiresAuth: true },
+    redirect: '/home',
+    meta: { title: '主布局' },
+    // 子路由：后台所有功能页面
     children: [
       {
-        path: '',
-        name: 'Dashboard',
+        path: 'home',
+        component: () => import('@/views/Home.vue'),
+        meta: { title: '首页', icon: 'Home' }
+      },
+      {
+        path: 'dashboard',
         component: () => import('@/views/Dashboard.vue'),
+        meta: { title: '仪表盘', icon: 'Dashboard' }
       },
       {
-        path: '/user',
-        name: 'UserList',
+        path: 'user',
         component: () => import('@/views/UserList.vue'),
+        meta: { title: '用户管理', icon: 'User' }
       },
       {
-        path: '/project',
-        name: 'ProjectAnalyzer',
+        path: 'project',
         component: () => import('@/views/ProjectAnalyzer.vue'),
+        meta: { title: '项目分析', icon: 'Document' }
       },
       {
-        path: '/github',
-        name: 'GithubTrending',
+        path: 'github',
         component: () => import('@/views/GithubTrending.vue'),
-      },
-    ],
+        meta: { title: 'GitHub趋势', icon: 'Link' }
+      }
+      // 后续新增页面，可在此处添加子路由
+    ]
   },
+  // 404页面：匹配所有未定义的路由，跳转到404
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/404.vue'),
+    meta: { hidden: true, title: '页面不存在' }
+  }
 ]
 
+// 创建路由实例
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+  scrollBehavior: () => ({ top: 0 })
 })
 
-// 路由守卫
-router.beforeEach((to, from, next) => {
-  const auth = useAuthStore()
-
-  // 白名单：无需登录的页面
-  if (!to.meta.requiresAuth) {
-    // 已登录状态下访问 login，跳转首页
-    if (to.path === '/login' && auth.isLoggedIn) {
-      next('/')
-      return
-    }
-    next()
-    return
+// 登录守卫：路由跳转前执行，验证是否登录
+router.beforeEach((to, _from, next) => {
+  // 1. 获取localStorage中的token（登录后存储）
+  const token = localStorage.getItem('token')
+  // 2. 逻辑判断：未登录 + 访问的不是登录页 → 跳转到登录页
+  if (to.path !== '/login' && !token) {
+    return next('/login')
   }
-
-  // 需要登录的页面：无 token 则跳转登录
-  if (!auth.isLoggedIn) {
-    next('/login')
-    return
+  // 3. 已登录 + 访问登录页 → 跳转到首页（避免重复登录）
+  if (to.path === '/login' && token) {
+    return next('/home')
   }
-
+  // 4. 正常跳转
   next()
 })
 

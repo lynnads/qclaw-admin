@@ -40,8 +40,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const response = await userService.login(params)
       
-      if (response.code === 200) {
-        const { token: newToken, userInfo: newUserInfo } = response.data
+      if (response.code === 200 && response.data) {
+        const newToken = response.data.token || ''
+        const newUserInfo = response.data.userInfo || response.data.user || { name: params.username }
         
         // 保存 token
         token.value = newToken

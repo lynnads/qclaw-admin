@@ -1,7 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { THEMES } from '@/constants'
-import type { Notification } from '@/types'
+
+interface Notification {
+  id: string
+  type: 'success' | 'error' | 'warning' | 'info'
+  message: string
+  duration?: number
+}
 
 export const useUiStore = defineStore('ui', () => {
   // 状态
@@ -20,7 +26,6 @@ export const useUiStore = defineStore('ui', () => {
 
   // 计算属性
   const isDarkTheme = computed(() => theme.value === THEMES.DARK)
-  
   const hasNotifications = computed(() => notifications.value.length > 0)
 
   // 主题管理
@@ -68,7 +73,6 @@ export const useUiStore = defineStore('ui', () => {
     
     notifications.value.push(newNotification)
     
-    // 自动移除
     setTimeout(() => {
       removeNotification(id)
     }, newNotification.duration)
@@ -77,7 +81,7 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   const removeNotification = (id: string) => {
-    const index = notifications.value.findIndex(n => n.id === id)
+    const index = notifications.value.findIndex((n: Notification) => n.id === id)
     if (index !== -1) {
       notifications.value.splice(index, 1)
     }
@@ -119,12 +123,9 @@ export const useUiStore = defineStore('ui', () => {
 
   // 初始化
   const init = () => {
-    // 应用主题
     document.documentElement.setAttribute('data-theme', theme.value)
-    
-    // 监听窗口大小变化
     window.addEventListener('resize', handleResize)
-    handleResize() // 初始检查
+    handleResize()
   }
 
   const destroy = () => {
@@ -132,31 +133,20 @@ export const useUiStore = defineStore('ui', () => {
   }
 
   return {
-    // 状态
     sidebarCollapsed,
     theme,
     mobileMenuOpen,
     notifications,
     loading,
-    
-    // 计算属性
     isDarkTheme,
     hasNotifications,
-    
-    // 主题管理
     setTheme,
     toggleTheme,
-    
-    // 侧边栏管理
     toggleSidebar,
     setSidebarCollapsed,
-    
-    // 移动端菜单
     openMobileMenu,
     closeMobileMenu,
     toggleMobileMenu,
-    
-    // 通知管理
     addNotification,
     removeNotification,
     clearNotifications,
@@ -164,11 +154,7 @@ export const useUiStore = defineStore('ui', () => {
     showError,
     showWarning,
     showInfo,
-    
-    // 加载状态
     setLoading,
-    
-    // 生命周期
     init,
     destroy,
   }

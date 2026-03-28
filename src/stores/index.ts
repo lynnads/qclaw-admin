@@ -1,4 +1,3 @@
-// 所有 stores 导出
-export { useAuthStore } from './auth'
-export { useProjectStore } from './project'
-export { useUiStore } from './ui'
+// 统一导出所有 Store
+export { useUserStore } from './modules/userStore'
+export { useProjectStore } from './modules/projectStore'
