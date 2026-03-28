@@ -12,7 +12,7 @@ let mockUsers = [
 
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms))
 
-export const mockLogin = async (username, password) => {
+export const mockLogin = async (username: string, password: string) => {
   await delay(600)
   if (username === 'admin' && password === '123456') {
     return {
@@ -27,7 +27,7 @@ export const mockLogin = async (username, password) => {
   return { code: 400, message: '用户名或密码错误', data: null }
 }
 
-export const mockGetUserList = async (params = {}) => {
+export const mockGetUserList = async (params: any = {}) => {
   await delay(400)
   let result = [...mockUsers]
 
@@ -48,7 +48,7 @@ export const mockGetUserList = async (params = {}) => {
   return { code: 200, message: 'success', data: { list, total, page, pageSize } }
 }
 
-export const mockAddUser = async (userData) => {
+export const mockAddUser = async (userData: any) => {
   await delay(400)
   const newUser = {
     id: Date.now(),
@@ -59,7 +59,7 @@ export const mockAddUser = async (userData) => {
   return { code: 200, message: '新增成功', data: newUser }
 }
 
-export const mockEditUser = async (id, userData) => {
+export const mockEditUser = async (id: number, userData: any) => {
   await delay(400)
   const index = mockUsers.findIndex(u => u.id === id)
   if (index !== -1) {
@@ -69,7 +69,7 @@ export const mockEditUser = async (id, userData) => {
   return { code: 404, message: '用户不存在', data: null }
 }
 
-export const mockDeleteUser = async (id) => {
+export const mockDeleteUser = async (id: number) => {
   await delay(400)
   const index = mockUsers.findIndex(u => u.id === id)
   if (index !== -1) {

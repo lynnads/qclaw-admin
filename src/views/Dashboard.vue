@@ -1,107 +1,83 @@
 <template>
-  <div class="space-y-6">
-
-    <!-- 页面标题 -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold text-white">控制台</h1>
-        <p class="text-sm text-white/40 mt-1">欢迎回来，{{ currentDate }}</p>
-      </div>
-      <button class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-white
-        bg-gradient-to-r from-[#7b2ff7] to-[#00d9ff] shadow-[0_4px_16px_rgba(123,47,247,0.3)]
-        hover:shadow-[0_6px_24px_rgba(123,47,247,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all duration-200">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-        </svg>
-        导出数据
-      </button>
+  <div class="dashboard">
+    <!-- 统计卡片 -->
+    <div class="stats-grid">
+      <StatCard
+        title="用户总数"
+        :value="stats.users"
+        icon-path="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+        :trend="12"
+        clickable
+        @click="navigateTo('/user')"
+      />
+      <StatCard
+        title="项目总数"
+        :value="stats.projects"
+        icon-path="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+        :trend="8"
+        clickable
+        @click="navigateTo('/project')"
+      />
+      <StatCard
+        title="运行中"
+        :value="stats.running"
+        icon-path="M13 10V3L4 14h7v7l9-11h-7z"
+        :trend="5"
+      />
+      <StatCard
+        title="依赖安装"
+        :value="stats.installed"
+        icon-path="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        :trend="15"
+      />
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div
-        v-for="(stat, i) in stats" :key="i"
-        class="group relative rounded-2xl overflow-hidden
-          bg-white/[0.05] backdrop-blur-xl border border-white/[0.08]
-          hover:bg-white/[0.09] hover:border-white/[0.15] hover:-translate-y-0.5
-          transition-all duration-300 shadow-[0_4px_24px_rgba(0,0,0,0.15)]"
-      >
-        <div class="p-5">
-          <div class="flex items-start justify-between">
-            <div>
-              <p class="text-xs font-medium text-white/40 uppercase tracking-wider">{{ stat.title }}</p>
-              <p class="text-2xl font-bold text-white mt-2">{{ stat.value }}</p>
-              <div class="flex items-center gap-1 mt-2">
-                <svg v-if="stat.trend > 0" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-                <span :class="stat.trend > 0 ? 'text-emerald-400' : 'text-red-400'" class="text-xs font-semibold">
-                  {{ Math.abs(stat.trend) }}%
-                </span>
-                <span class="text-xs text-white/30">较上月</span>
+    <!-- 图表区域 -->
+    <div class="charts-section">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">项目技术栈分布</h3>
+        </div>
+        <div class="chart-content">
+          <div class="framework-stats">
+            <div
+              v-for="(count, framework) in frameworkStats"
+              :key="framework"
+              class="framework-item"
+            >
+              <div class="framework-info">
+                <span class="framework-name">{{ framework }}</span>
+                <span class="framework-count">{{ count }}</span>
+              </div>
+              <div class="framework-bar">
+                <div
+                  class="framework-fill"
+                  :style="{ width: getPercentage(count) + '%' }"
+                ></div>
               </div>
             </div>
-            <div :class="['w-11 h-11 rounded-xl flex items-center justify-center', stat.iconBg]">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path v-for="(d,idx) in stat.icon" :key="idx" stroke-linecap="round" stroke-linejoin="round" :d="d" />
-              </svg>
-            </div>
-          </div>
-        </div>
-        <!-- 底部渐变线 -->
-        <div :class="['h-0.5 w-full', stat.gradient]"></div>
-      </div>
-    </div>
-
-    <!-- 图表 & 动态 -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
-      <!-- 数据图表 -->
-      <div class="xl:col-span-2 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.15)]">
-        <div class="flex items-center justify-between p-5 border-b border-white/[0.06]">
-          <h2 class="text-sm font-semibold text-white">数据概览</h2>
-          <div class="flex gap-1.5">
-            <button
-              v-for="p in ['日','周','月']" :key="p"
-              @click="activePeriod = p"
-              :class="[
-                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200',
-                activePeriod === p
-                  ? 'bg-gradient-to-r from-[#7b2ff7]/80 to-[#00d9ff]/80 text-white shadow-[0_2px_8px_rgba(123,47,247,0.3)]'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/[0.06]',
-              ]"
-            >{{ p }}</button>
-          </div>
-        </div>
-        <div class="p-5">
-          <div class="h-52 flex items-end gap-3 px-2">
-            <div
-              v-for="(h, i) in chartBars" :key="i"
-              class="flex-1 rounded-t-xl transition-all duration-300 cursor-pointer group"
-              :class="i === chartBars.length - 1
-                ? 'bg-gradient-to-t from-[#7b2ff7] to-[#00d9ff] shadow-[0_0_16px_rgba(123,47,247,0.3)]'
-                : 'bg-white/[0.08] hover:bg-white/[0.15]'"
-              :style="{ height: h + '%', minHeight: '8%' }"
-            >
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity text-center text-xs text-white/60 mt-2">{{ h }}%</div>
-            </div>
-          </div>
-          <div class="flex justify-between mt-3 px-2 text-xs text-white/25">
-            <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span>
           </div>
         </div>
       </div>
 
-      <!-- 最新动态 -->
-      <div class="rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.15)]">
-        <div class="p-5 border-b border-white/[0.06]">
-          <h2 class="text-sm font-semibold text-white">最新动态</h2>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">最近活动</h3>
         </div>
-        <div class="p-4 space-y-3">
-          <div v-for="(item, i) in activities" :key="i" class="flex items-start gap-3 p-3 rounded-xl hover:bg-white/[0.05] transition-colors duration-150">
-            <div :class="['w-2 h-2 rounded-full mt-1.5 flex-shrink-0', item.dot]"></div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs text-white/70 leading-relaxed">{{ item.text }}</p>
-              <p class="text-xs text-white/25 mt-1">{{ item.time }}</p>
+        <div class="chart-content">
+          <div class="activity-list">
+            <div v-for="activity in recentActivities" :key="activity.id" class="activity-item">
+              <div class="activity-icon" :class="activity.type">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path v-if="activity.type === 'project'" stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                  <path v-else-if="activity.type === 'user'" stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <path v-else stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div class="activity-content">
+                <p class="activity-text">{{ activity.text }}</p>
+                <p class="activity-time">{{ activity.time }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -109,97 +85,223 @@
     </div>
 
     <!-- 快捷入口 -->
-    <div class="rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.15)]">
-      <div class="p-5 border-b border-white/[0.06]">
-        <h2 class="text-sm font-semibold text-white">快捷入口</h2>
-      </div>
-      <div class="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="quick-actions">
+      <h3 class="section-title">快捷入口</h3>
+      <div class="actions-grid">
         <button
-          v-for="(s, i) in shortcuts" :key="i"
-          class="flex flex-col items-center gap-3 p-4 rounded-xl
-            bg-white/[0.04] border border-white/[0.06]
-            hover:bg-white/[0.09] hover:border-white/[0.12] hover:-translate-y-0.5
-            active:scale-[0.97] transition-all duration-200"
+          v-for="action in quickActions"
+          :key="action.path"
+          @click="navigateTo(action.path)"
+          class="action-btn"
         >
-          <div :class="['w-10 h-10 rounded-xl flex items-center justify-center', s.iconBg]">
+          <div class="action-icon" :style="{ background: action.color }">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path v-for="(d,idx) in s.icon" :key="idx" stroke-linecap="round" stroke-linejoin="round" :d="d" />
+              <path stroke-linecap="round" stroke-linejoin="round" :d="action.icon" />
             </svg>
           </div>
-          <span class="text-xs font-medium text-white/70">{{ s.label }}</span>
+          <span class="action-text">{{ action.title }}</span>
         </button>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useProjectStore } from '@/stores/project'
+import { StatCard } from '@/components'
 
-const today = new Date()
-const currentDate = today.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
-const activePeriod = ref('月')
+const router = useRouter()
+const projectStore = useProjectStore()
 
-const stats = [
+// 统计数据
+const stats = ref({
+  users: 8,
+  projects: 0,
+  running: 0,
+  installed: 0,
+})
+
+// 框架统计
+const frameworkStats = computed(() => {
+  const grouped: Record<string, number> = {}
+  projectStore.projects.forEach(project => {
+    const framework = project.framework || 'Unknown'
+    grouped[framework] = (grouped[framework] || 0) + 1
+  })
+  return grouped
+})
+
+// 最近活动
+const recentActivities = ref([
+  { id: 1, type: 'project', text: 'qclaw-admin 项目已启动', time: '2分钟前' },
+  { id: 2, type: 'user', text: '新用户 张三 已注册', time: '15分钟前' },
+  { id: 3, type: 'project', text: 'my-vue-app 依赖安装完成', time: '30分钟前' },
+  { id: 4, type: 'run', text: 'react-project 运行中', time: '1小时前' },
+])
+
+// 快捷入口
+const quickActions = [
   {
-    title: '总用户数', value: '12,845', trend: 12.5,
-    iconBg: 'bg-[#7b2ff7]/20 text-[#7b2ff7]',
-    gradient: 'bg-gradient-to-r from-[#7b2ff7] to-transparent',
-    icon: ['M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+    title: '扫描项目',
+    path: '/project',
+    icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
+    color: 'linear-gradient(135deg, #7b2ff7 0%, #00d9ff 100%)',
   },
   {
-    title: '总订单数', value: '8,642', trend: 8.2,
-    iconBg: 'bg-[#00d9ff]/20 text-[#00d9ff]',
-    gradient: 'bg-gradient-to-r from-[#00d9ff] to-transparent',
-    icon: ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+    title: '用户管理',
+    path: '/user',
+    icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z',
+    color: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
   },
   {
-    title: '活跃度', value: '68.5%', trend: 3.1,
-    iconBg: 'bg-emerald-500/20 text-emerald-400',
-    gradient: 'bg-gradient-to-r from-emerald-500 to-transparent',
-    icon: ['M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
-  },
-  {
-    title: '总收入', value: '¥98,542', trend: 23.4,
-    iconBg: 'bg-[#f107a3]/20 text-[#f107a3]',
-    gradient: 'bg-gradient-to-r from-[#f107a3] to-transparent',
-    icon: ['M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+    title: 'GitHub趋势',
+    path: '/github',
+    icon: 'M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z',
+    color: 'linear-gradient(135deg, #333 0%, #666 100%)',
   },
 ]
 
-const chartBars = [45, 62, 55, 78, 68, 92]
+// 计算百分比
+const getPercentage = (count: number): number => {
+  const total = Object.values(frameworkStats.value).reduce((a, b) => a + b, 0)
+  return total > 0 ? Math.round((count / total) * 100) : 0
+}
 
-const activities = [
-  { text: '张三 完成了用户资料更新', time: '3 分钟前', dot: 'bg-[#7b2ff7]' },
-  { text: '李四 提交了新订单 #10234', time: '15 分钟前', dot: 'bg-[#00d9ff]' },
-  { text: '王五 评论了你的文章', time: '1 小时前', dot: 'bg-emerald-400' },
-  { text: '系统完成每日数据备份', time: '2 小时前', dot: 'bg-[#f107a3]' },
-  { text: '赵六 修改了个人设置', time: '3 小时前', dot: 'bg-amber-400' },
-]
+// 导航
+const navigateTo = (path: string) => {
+  router.push(path)
+}
 
-const shortcuts = [
-  {
-    label: '用户管理',
-    iconBg: 'bg-[#7b2ff7]/20 text-[#7b2ff7]',
-    icon: ['M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-  },
-  {
-    label: '订单管理',
-    iconBg: 'bg-[#00d9ff]/20 text-[#00d9ff]',
-    icon: ['M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-  },
-  {
-    label: '数据分析',
-    iconBg: 'bg-emerald-500/20 text-emerald-400',
-    icon: ['M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z'],
-  },
-  {
-    label: '系统设置',
-    iconBg: 'bg-[#f107a3]/20 text-[#f107a3]',
-    icon: [
-      'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z',
-      'M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-    ],
-  },
-]
+// 加载数据
+onMounted(async () => {
+  try {
+    await projectStore.scanProjects()
+    stats.value.projects = projectStore.total
+    stats.value.running = projectStore.runningProjects.length
+    stats.value.installed = projectStore.installedProjects.length
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error)
+  }
+})
 </script>
+
+<style scoped>
+.dashboard {
+  @apply space-y-6;
+}
+
+.stats-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.charts-section {
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-4;
+}
+
+.chart-card {
+  @apply rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] overflow-hidden shadow-[0_4px_24px_rgba(0,0,0,0.15)];
+}
+
+.chart-header {
+  @apply px-5 py-4 border-b border-white/[0.06];
+}
+
+.chart-title {
+  @apply text-sm font-semibold text-white/90;
+}
+
+.chart-content {
+  @apply p-5;
+}
+
+.framework-stats {
+  @apply space-y-3;
+}
+
+.framework-item {
+  @apply space-y-1.5;
+}
+
+.framework-info {
+  @apply flex items-center justify-between;
+}
+
+.framework-name {
+  @apply text-sm text-white/60;
+}
+
+.framework-count {
+  @apply text-sm text-white/90 font-medium;
+}
+
+.framework-bar {
+  @apply h-2 bg-white/[0.06] rounded-full overflow-hidden;
+}
+
+.framework-fill {
+  @apply h-full bg-gradient-to-r from-[#7b2ff7] to-[#00d9ff] rounded-full transition-all duration-300;
+}
+
+.activity-list {
+  @apply space-y-3;
+}
+
+.activity-item {
+  @apply flex items-center gap-3;
+}
+
+.activity-icon {
+  @apply w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0;
+}
+
+.activity-icon.project {
+  @apply bg-[#7b2ff7]/20 text-[#7b2ff7];
+}
+
+.activity-icon.user {
+  @apply bg-emerald-500/20 text-emerald-400;
+}
+
+.activity-icon.run {
+  @apply bg-blue-500/20 text-blue-400;
+}
+
+.activity-content {
+  @apply flex-1 min-w-0;
+}
+
+.activity-text {
+  @apply text-sm text-white/80 truncate;
+}
+
+.activity-time {
+  @apply text-xs text-white/40;
+}
+
+.quick-actions {
+  @apply space-y-4;
+}
+
+.section-title {
+  @apply text-base font-semibold text-white/90;
+}
+
+.actions-grid {
+  @apply grid grid-cols-2 sm:grid-cols-4 gap-4;
+}
+
+.action-btn {
+  @apply flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/[0.05] backdrop-blur-xl border border-white/[0.08]
+         hover:bg-white/[0.08] hover:border-white/[0.12] transition-all duration-200;
+}
+
+.action-icon {
+  @apply w-12 h-12 rounded-xl flex items-center justify-center shadow-[0_4px_16px_rgba(123,47,247,0.3)];
+}
+
+.action-text {
+  @apply text-sm text-white/70;
+}
+</style>

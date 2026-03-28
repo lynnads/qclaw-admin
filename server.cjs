@@ -92,9 +92,9 @@ const detectFramework = (pkg) => {
 const sendJSON = (res, statusCode, data) => {
   res.writeHead(statusCode, {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Origin': 'http://localhost:3000',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   })
   res.end(JSON.stringify(data))
 }
@@ -108,9 +108,9 @@ const server = http.createServer((req, res) => {
   // 处理 CORS 预检请求
   if (req.method === 'OPTIONS') {
     res.writeHead(200, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
+      'Access-Control-Allow-Origin': 'http://localhost:3000',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     })
     res.end()
     return
@@ -280,6 +280,211 @@ const server = http.createServer((req, res) => {
         sendJSON(res, 400, { code: 400, message: e.message, data: null })
       }
     })
+    return
+  }
+
+  // API: 停止项目
+  if (pathname === '/api/projects/stop' && req.method === 'POST') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { projectPath } = JSON.parse(body)
+        
+        if (!projectPath) {
+          return sendJSON(res, 400, { code: 400, message: '缺少项目路径', data: null })
+        }
+        
+        // TODO: 实现停止项目逻辑，需要维护运行中的进程 PID 映射
+        sendJSON(res, 200, { code: 200, message: '项目已停止', data: null })
+      } catch (e) {
+        sendJSON(res, 400, { code: 400, message: e.message, data: null })
+      }
+    })
+    return
+  }
+
+  // API: 切换 Node 版本（前端路由别名，兼容前端常量定义）
+  if (pathname === '/api/projects/switch-node' && req.method === 'POST') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { version } = JSON.parse(body)
+        
+        if (!version) {
+          return sendJSON(res, 400, { code: 400, message: '缺少版本号', data: null })
+        }
+        
+        exec(`nvm use ${version}`, (error, stdout, stderr) => {
+          if (error) {
+            return sendJSON(res, 500, { code: 500, message: '切换失败，请确保已安装 nvm', data: null })
+          }
+          sendJSON(res, 200, { code: 200, message: `已切换到 Node ${version}`, data: null })
+        })
+      } catch (e) {
+        sendJSON(res, 400, { code: 400, message: e.message, data: null })
+      }
+    })
+    return
+  }
+
+  // ==================== 用户 API ====================
+
+  // 模拟用户数据库
+  // TODO: 密码目前为明文存储，仅用于开发测试环境。生产环境需使用 bcrypt 等加密方式存储密码。
+  // 测试账号统一密码: Test@123
+  const USERS_DB = [
+    { id: 1, name: 'Admin', username: 'admin', password: 'Test@123', role: '管理员', email: 'admin@qclaw.com', status: 'active', avatar: '' },
+    { id: 2, name: '张三', username: 'zhangsan', password: 'Test@123', role: '用户', email: 'zhangsan@qclaw.com', status: 'active', avatar: '' },
+    { id: 3, name: '李四', username: 'lisi', password: 'Test@123', role: '用户', email: 'lisi@qclaw.com', status: 'active', avatar: '' },
+    { id: 4, name: '王五', username: 'wangwu', password: 'Test@123', role: '访客', email: 'wangwu@qclaw.com', status: 'active', avatar: '' },
+    { id: 5, name: '赵六', username: 'zhaoliu', password: 'Test@123', role: '用户', email: 'zhaoliu@qclaw.com', status: 'active', avatar: '' },
+    { id: 6, name: '孙七', username: 'sunqi', password: 'Test@123', role: '用户', email: 'sunqi@qclaw.com', status: 'disabled', avatar: '' },
+    { id: 7, name: '周八', username: 'zhouba', password: 'Test@123', role: '用户', email: 'zhouba@qclaw.com', status: 'active', avatar: '' },
+    { id: 8, name: '吴九', username: 'wujiu', password: 'Test@123', role: '用户', email: 'wujiu@qclaw.com', status: 'active', avatar: '' },
+  ]
+
+  // API: 用户登录
+  if (pathname === '/api/users/login' && req.method === 'POST') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { username, password } = JSON.parse(body)
+
+        if (!username || !password) {
+          return sendJSON(res, 400, { code: 400, message: '请输入用户名和密码', data: null })
+        }
+
+        const user = USERS_DB.find(u => u.username === username && u.password === password)
+
+        if (!user) {
+          return sendJSON(res, 401, { code: 401, message: '用户名或密码错误', data: null })
+        }
+
+        if (user.status === 'disabled') {
+          return sendJSON(res, 403, { code: 403, message: '账号已被禁用', data: null })
+        }
+
+        const token = 'token_' + Date.now() + '_' + Math.random().toString(36).slice(2)
+        const { password: _, ...userInfo } = user
+
+        sendJSON(res, 200, {
+          code: 200,
+          message: '登录成功',
+          data: {
+            token,
+            userInfo,
+          }
+        })
+      } catch (e) {
+        sendJSON(res, 500, { code: 500, message: e.message, data: null })
+      }
+    })
+    return
+  }
+
+  // API: 获取用户列表
+  if (pathname === '/api/users/list' && req.method === 'GET') {
+    const { keyword, role, status, page = 1, pageSize = 10 } = query
+
+    let filtered = [...USERS_DB]
+
+    if (keyword) {
+      const kw = keyword.toLowerCase()
+      filtered = filtered.filter(u =>
+        u.name.toLowerCase().includes(kw) ||
+        u.username.toLowerCase().includes(kw) ||
+        u.email.toLowerCase().includes(kw)
+      )
+    }
+    if (role) {
+      filtered = filtered.filter(u => u.role === role)
+    }
+    if (status) {
+      filtered = filtered.filter(u => u.status === status)
+    }
+
+    const total = filtered.length
+    const start = (Number(page) - 1) * Number(pageSize)
+    const list = filtered.slice(start, start + Number(pageSize)).map(({ password, ...u }) => u)
+
+    sendJSON(res, 200, {
+      code: 200,
+      message: '获取成功',
+      data: { list, total, page: Number(page), pageSize: Number(pageSize) }
+    })
+    return
+  }
+
+  // API: 新增用户
+  if (pathname === '/api/users/add' && req.method === 'POST') {
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const { name, username, password, role = '用户', email, status = 'active' } = JSON.parse(body)
+
+        if (!name || !username || !password) {
+          return sendJSON(res, 400, { code: 400, message: '缺少必填字段', data: null })
+        }
+
+        if (USERS_DB.find(u => u.username === username)) {
+          return sendJSON(res, 400, { code: 400, message: '用户名已存在', data: null })
+        }
+
+        const newUser = {
+          id: USERS_DB.length + 1,
+          name, username, password, role, email: email || '', status, avatar: ''
+        }
+        USERS_DB.push(newUser)
+
+        const { password: _, ...userInfo } = newUser
+        sendJSON(res, 200, { code: 200, message: '新增成功', data: userInfo })
+      } catch (e) {
+        sendJSON(res, 500, { code: 500, message: e.message, data: null })
+      }
+    })
+    return
+  }
+
+  // API: 编辑用户
+  if (pathname.startsWith('/api/users/edit/') && req.method === 'PUT') {
+    const id = Number(pathname.split('/').pop())
+    let body = ''
+    req.on('data', chunk => { body += chunk })
+    req.on('end', () => {
+      try {
+        const user = USERS_DB.find(u => u.id === id)
+        if (!user) {
+          return sendJSON(res, 404, { code: 404, message: '用户不存在', data: null })
+        }
+
+        const updates = JSON.parse(body)
+        Object.assign(user, updates, { id: user.id, password: user.password })
+
+        const { password: _, ...userInfo } = user
+        sendJSON(res, 200, { code: 200, message: '编辑成功', data: userInfo })
+      } catch (e) {
+        sendJSON(res, 500, { code: 500, message: e.message, data: null })
+      }
+    })
+    return
+  }
+
+  // API: 删除用户
+  if (pathname.startsWith('/api/users/delete/') && req.method === 'DELETE') {
+    const id = Number(pathname.split('/').pop())
+    const idx = USERS_DB.findIndex(u => u.id === id)
+
+    if (idx === -1) {
+      return sendJSON(res, 404, { code: 404, message: '用户不存在', data: null })
+    }
+
+    const removed = USERS_DB.splice(idx, 1)[0]
+    const { password: _, ...userInfo } = removed
+    sendJSON(res, 200, { code: 200, message: '删除成功', data: userInfo })
     return
   }
 

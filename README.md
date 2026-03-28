@@ -1,39 +1,155 @@
-# qclaw-admin
+# QClaw Admin
 
-#### 介绍
-{**以下是 Gitee 平台说明，您可以替换此简介**
-Gitee 是 OSCHINA 推出的基于 Git 的代码托管平台（同时支持 SVN）。专为开发者提供稳定、高效、安全的云端软件开发协作平台
-无论是个人、团队、或是企业，都能够用 Gitee 实现代码托管、项目管理、协作开发。企业项目请看 [https://gitee.com/enterprises](https://gitee.com/enterprises)}
+现代化的项目管理后台系统，基于 Vue 3 + Vite + TypeScript 构建。
 
-#### 软件架构
-软件架构说明
+## ✨ 功能特性
 
+- **项目扫描**：自动扫描本地项目，识别技术栈
+- **依赖管理**：一键安装项目依赖
+- **项目运行**：启动/停止开发服务器
+- **用户管理**：完整的用户 CRUD 操作
+- **现代化 UI**：深色主题 + 渐变设计
+- **响应式布局**：支持桌面端和移动端
 
-#### 安装教程
+## 🚀 快速开始
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### 环境要求
 
-#### 使用说明
+- Node.js >= 18
+- npm / pnpm / yarn
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+### 安装依赖
 
-#### 参与贡献
+```bash
+# 使用 npm
+npm install
 
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+# 或使用 pnpm
+pnpm install
 
+# 或使用 yarn
+yarn install
+```
 
-#### 特技
+### 启动开发
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+```bash
+# 启动后端服务器（端口 3456）
+npm run server
+
+# 启动前端开发服务器（端口 3000）
+npm run dev
+
+# 或同时启动（推荐）
+npm run dev:all
+```
+
+### 访问应用
+
+- 前端：http://localhost:3000
+- 后端：http://localhost:3456
+
+### 测试账号
+
+- 用户名：`admin`
+- 密码：`123456`
+
+## 📁 项目结构
+
+```
+qclaw-admin/
+├── src/
+│   ├── api/           # API 接口
+│   ├── components/    # Vue 组件
+│   ├── constants/     # 常量定义
+│   ├── layout/        # 布局组件
+│   ├── router/        # 路由配置
+│   ├── services/      # 业务服务
+│   ├── stores/        # Pinia 状态管理
+│   ├── types/         # TypeScript 类型定义
+│   ├── utils/         # 工具函数
+│   ├── views/         # 页面组件
+│   └── style.css      # 全局样式
+├── server.cjs         # 后端服务器
+├── vite.config.ts     # Vite 配置
+├── tailwind.config.js # Tailwind 配置
+└── package.json       # 项目配置
+```
+
+## 🔧 开发指南
+
+### 代码规范
+
+- 使用 TypeScript 进行类型检查
+- 遵循 ESLint 和 Prettier 规范
+- 组件使用 `<script setup>` 语法
+- 样式使用 Tailwind CSS
+
+### 提交规范
+
+```
+feat: 新功能
+fix: 修复 bug
+docs: 文档更新
+style: 代码格式调整
+refactor: 重构
+test: 测试相关
+chore: 构建/工具相关
+```
+
+## 📦 构建部署
+
+```bash
+# 构建生产版本
+npm run build
+
+# 预览构建结果
+npm run preview
+```
+
+## 🧪 测试
+
+```bash
+# 运行单元测试
+npm run test
+
+# 运行测试覆盖率
+npm run test:coverage
+```
+
+## 📝 API 文档
+
+### 项目相关
+
+- `GET /api/projects/scan` - 扫描项目
+- `POST /api/projects/install` - 安装依赖
+- `POST /api/projects/run` - 运行项目
+- `POST /api/projects/stop` - 停止项目
+- `POST /api/projects/switch-node` - 切换 Node 版本
+
+### 用户相关
+
+- `POST /api/users/login` - 用户登录
+- `GET /api/users/list` - 获取用户列表
+- `POST /api/users/add` - 新增用户
+- `PUT /api/users/edit/:id` - 编辑用户
+- `DELETE /api/users/delete/:id` - 删除用户
+
+## 🤝 贡献指南
+
+1. Fork 本仓库
+2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 创建 Pull Request
+
+## 📄 许可证
+
+MIT License - 详见 [LICENSE](LICENSE) 文件
+
+## 🙏 致谢
+
+- [Vue.js](https://vuejs.org/) - 渐进式 JavaScript 框架
+- [Vite](https://vitejs.dev/) - 下一代前端构建工具
+- [Tailwind CSS](https://tailwindcss.com/) - 实用优先的 CSS 框架
+- [Pinia](https://pinia.vuejs.org/) - Vue 状态管理库
