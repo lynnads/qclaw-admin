@@ -142,7 +142,7 @@ const server = http.createServer((req, res) => {
     return
   }
   if (pathname === '/api/projects/scan' && req.method === 'GET') {
-    const basePath = query.path || 'D:\\workProject'
+    const basePath = query.path || 'D:\\workProject\\sele_project'
     
     try {
       if (!fs.existsSync(basePath)) {
