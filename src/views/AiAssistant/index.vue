@@ -652,6 +652,7 @@ onMounted(() => {
 
 .result-code {
   @apply text-sm text-emerald-300/90 whitespace-pre-wrap break-words font-mono leading-relaxed bg-black/20 rounded-xl p-4 overflow-auto
+}
 /* Loading */
 .result-loading { @apply flex flex-col items-center justify-center gap-4 py-12; }
 .loading-spinner { @apply w-8 h-8 rounded-full border-2 border-white/10 border-t-[#7b2ff7] animate-spin; }
@@ -687,8 +688,10 @@ onMounted(() => {
 /* 动画 */
 .slide-enter-active, .slide-leave-active { @apply transition-all duration-300 overflow-hidden; }
 .slide-enter-from, .slide-leave-to { @apply opacity-0 max-h-0; }
-.slide-enter-to, .slide-leave-from { @apply opacity-100 max-h-[500px]; }
+.slide-enter-to { @apply opacity-100 max-h-[500px]; }
+.slide-leave-from { @apply opacity-100 max-h-[500px]; }
 
 .fade-enter-active, .fade-leave-active { @apply transition-all duration-300; }
-.fade-enter-from, .fade-leave-to { @apply opacity-0; }
+.fade-enter-from { @apply opacity-0; }
+.fade-leave-to { @apply opacity-0; }
 </style>
