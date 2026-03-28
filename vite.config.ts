@@ -30,14 +30,16 @@ export default defineConfig({
   },
   // 开发服务器配置
   server: {
-    port: 3000, // 固定开发端口，避免端口冲突
+    port: 3001, // 开发端口（3000被占用）
     open: true,
     proxy: {
-      // 跨域代理：请求以/api开头的接口，转发到后端服务地址（适配项目现有后端3456端口）
+      // 跨域代理：请求以/api开头的接口，转发到后端服务地址
       '/api': {
         target: 'http://localhost:3456',
-        changeOrigin: true, // 允许跨域
-        // pathRewrite: { '^/api': '' } // 若后端接口无/api前缀，可解开注释
+        changeOrigin: true,
+        headers: {
+          'Access-Control-Allow-Origin': '*' // 允许所有源访问
+        }
       }
     }
   }
