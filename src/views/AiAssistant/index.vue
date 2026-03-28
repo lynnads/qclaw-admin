@@ -652,3 +652,43 @@ onMounted(() => {
 
 .result-code {
   @apply text-sm text-emerald-300/90 whitespace-pre-wrap break-words font-mono leading-relaxed bg-black/20 rounded-xl p-4 overflow-auto
+/* Loading */
+.result-loading { @apply flex flex-col items-center justify-center gap-4 py-12; }
+.loading-spinner { @apply w-8 h-8 rounded-full border-2 border-white/10 border-t-[#7b2ff7] animate-spin; }
+.result-loading p { @apply text-sm text-white/40; }
+
+/* Error */
+.result-error { @apply text-sm text-red-400 whitespace-pre-wrap; }
+
+/* Pre / Text */
+.result-pre { @apply text-sm text-white/70 whitespace-pre-wrap break-words font-mono leading-relaxed; }
+
+/* Placeholder */
+.result-placeholder { @apply flex flex-col items-center justify-center gap-3 py-12 text-center; }
+.result-placeholder svg { @apply w-12 h-12 text-white/10; }
+.result-placeholder p { @apply text-sm text-white/30; }
+.placeholder-hint { @apply text-xs text-white/20; }
+
+/* 回测结果 */
+.backtest-section { @apply border-t border-white/[0.06]; }
+.backtest-grid { @apply grid grid-cols-3 gap-4 p-5; }
+.backtest-item { @apply flex flex-col gap-1.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]; }
+.backtest-label { @apply text-xs text-white/30; }
+.backtest-value { @apply text-base font-bold text-white/90; }
+.backtest-value.positive { @apply text-emerald-400; }
+.backtest-value.negative { @apply text-red-400; }
+.backtest-period { @apply px-5 pb-3 text-xs text-white/25; }
+.backtest-warning {
+  @apply flex items-center gap-2 mx-5 mb-5 px-3 py-2 rounded-xl
+         bg-amber-500/10 border border-amber-500/20
+         text-xs text-amber-400/80;
+}
+
+/* 动画 */
+.slide-enter-active, .slide-leave-active { @apply transition-all duration-300 overflow-hidden; }
+.slide-enter-from, .slide-leave-to { @apply opacity-0 max-h-0; }
+.slide-enter-to, .slide-leave-from { @apply opacity-100 max-h-[500px]; }
+
+.fade-enter-active, .fade-leave-active { @apply transition-all duration-300; }
+.fade-enter-from, .fade-leave-to { @apply opacity-0; }
+</style>
