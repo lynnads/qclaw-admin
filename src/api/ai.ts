@@ -30,62 +30,66 @@ export interface AiPromptTemplate {
   content: string
   icon?: string
   category?: string
+  category2?: 'dev' | 'quant'
+}
+
+// ============ 股票量化相关接口 ============
+
+/** 股票日线数据 */
+export interface StockKLine {
+  date: string
+  open: number
+  close: number
+  high: number
+  low: number
+  volume: number
+  amount: number
+}
+
+/** 回测结果 */
+export interface BacktestResult {
+  annualReturn: string    // 年化收益率
+  maxDrawdown: string     // 最大回撤
+  winRate: string         // 胜率
+  backtestPeriod: string   // 回测周期
+  totalTrades: number     // 总交易次数
+  sharpRatio: string      // 夏普比率
+  profitFactor: string    // 盈亏比
+}
+
+/** 量化策略参数 */
+export interface QuantStrategyParams {
+  strategyType: '双均线' | '市盈率单因子' | '技术指标' | 'RSI' | 'MACD'
+  stockCode?: string
+}
+
+/** 股票数据参数 */
+export interface StockDataParams {
+  stockCode: string
+  startDate: string
+  endDate: string
 }
 
 export const aiApi = {
-  /**
-   * 智能文本生成
-   * 适用场景：生成表格数据、接口文档、代码片段、报告文案
-   */
-  generateText: (params: AiGenerateParams) => {
-    return request({
-      url: '/api/ai/generate',
-      method: 'post',
-      data: params
-    })
-  },
+  // ========== 通用AI接口 ==========
+  generateText: (params: AiGenerateParams) => request({ url: '/api/ai/generate', method: 'post', data: params }),
+  aiSearch: (params: AiSearchParams) => request({ url: '/api/ai/search', method: 'get', params }),
+  getAiHistory: () => request({ url: '/api/ai/history', method: 'get' }),
+  getPromptTemplates: () => request({ url: '/api/ai/templates', method: 'get' }),
+  deleteHistory: (id: number) => request({ url: `/api/ai/history/${id}`, method: 'delete' }),
 
-  /**
-   * AI智能搜索
-   * 适用场景：后台模块的智能模糊搜索、语义联想
-   */
-  aiSearch: (params: AiSearchParams) => {
-    return request({
-      url: '/api/ai/search',
-      method: 'get',
-      params
-    })
-  },
+  // ========== 股票量化接口 ==========
+  /** 获取股票K线数据 */
+  getStockData: (params: StockDataParams) => request({ url: '/api/ai/stock/data', method: 'get', params }),
 
-  /**
-   * 获取AI请求历史记录
-   */
-  getAiHistory: () => {
-    return request({
-      url: '/api/ai/history',
-      method: 'get'
-    })
-  },
+  /** 生成量化策略代码 */
+  generateQuantStrategy: (params: QuantStrategyParams) => request({ url: '/api/ai/quant/strategy', method: 'post', data: params }),
 
-  /**
-   * 获取常用Prompt模板列表
-   */
-  getPromptTemplates: () => {
-    return request({
-      url: '/api/ai/templates',
-      method: 'get'
-    })
-  },
+  /** 策略回测 */
+  backtestStrategy: (params: { strategyCode: string; stockData: StockKLine[] }) => request({ url: '/api/ai/quant/backtest', method: 'post', data: params }),
 
-  /**
-   * 删除单条历史记录
-   */
-  deleteHistory: (id: number) => {
-    return request({
-      url: `/api/ai/history/${id}`,
-      method: 'delete'
-    })
-  }
+  /** 分析股票历史数据 */
+  analyzeStock: (params: StockDataParams) => request({ url: '/api/ai/stock/analyze', method: 'post', data: params }),
 }
 
 export default aiApi
