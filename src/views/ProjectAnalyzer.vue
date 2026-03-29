@@ -63,8 +63,7 @@
       <p>暂无项目，请扫描目录</p>
     </div>
 
-    <!-- 加载遮罩 -->
-    <LoadingOverlay :visible="projectStore.isLoading" text="扫描项目中..." />
+
   </div>
 </template>
 
@@ -72,7 +71,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useProjectStore } from '@/stores/project'
 import { useUiStore } from '@/stores/ui'
-import { ProjectCard, LoadingOverlay, CustomSelect } from '@/components'
+import { ElLoading } from 'element-plus'
+import { ProjectCard, CustomSelect } from '@/components'
 import type { Project } from '@/types'
 
 const projectStore = useProjectStore()
@@ -82,6 +82,7 @@ const uiStore = useUiStore()
 const searchKeyword = ref('')
 const filterFramework = ref('')
 const filterPackageManager = ref('')
+const loadingInstance = ref<any>(null)
 
 // 计算属性
 const frameworks = computed(() => {
@@ -136,11 +137,15 @@ const runningCount = computed(() =>
 
 // 方法
 const scanProjects = async () => {
+  if (loadingInstance.value) loadingInstance.value.close()
+  loadingInstance.value = ElLoading.service({ text: '扫描项目中...', fullscreen: true })
   try {
     await projectStore.scanProjects()
     uiStore.showSuccess('项目扫描完成')
   } catch (error) {
     uiStore.showError('扫描失败，请重试')
+  } finally {
+    loadingInstance.value?.close()
   }
 }
 

@@ -32,67 +32,58 @@
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
               <label>用户名</label>
-              <div class="input-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <input
-                  v-model="form.username"
-                  type="text"
-                  placeholder="请输入用户名"
-                  class="form-input"
-                  :class="{ error: errors.username }"
-                />
-              </div>
+              <el-input
+                v-model="form.username"
+                type="text"
+                placeholder="请输入用户名"
+                :prefix-icon="UserIcon"
+                size="large"
+                :class="{ 'is-error': errors.username }"
+                @keyup.enter="handleLogin"
+              />
               <p v-if="errors.username" class="error-text">{{ errors.username }}</p>
             </div>
 
             <div class="form-group">
               <label>密码</label>
-              <div class="input-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" class="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <input
-                  v-model="form.password"
-                  :type="showPassword ? 'text' : 'password'"
-                  placeholder="请输入密码"
-                  class="form-input"
-                  :class="{ error: errors.password }"
-                />
-                <button type="button" @click="showPassword = !showPassword" class="password-toggle">
-                  <svg v-if="!showPassword" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                  </svg>
-                </button>
-              </div>
+              <el-input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="请输入密码"
+                :prefix-icon="LockIcon"
+                size="large"
+                :class="{ 'is-error': errors.password }"
+                @keyup.enter="handleLogin"
+              >
+                <template #suffix>
+                  <el-icon class="password-toggle" @click="showPassword = !showPassword">
+                    <View v-if="!showPassword" />
+                    <Hide v-else />
+                  </el-icon>
+                </template>
+              </el-input>
               <p v-if="errors.password" class="error-text">{{ errors.password }}</p>
             </div>
 
             <div class="form-options">
-              <label class="remember-me">
-                <input v-model="form.remember" type="checkbox" />
-                <span>记住我</span>
-              </label>
+              <el-checkbox v-model="form.remember" size="small">记住我</el-checkbox>
               <a href="#" class="forgot-password">忘记密码？</a>
             </div>
 
-            <button type="submit" :disabled="isLoading" class="login-btn">
-              <svg v-if="isLoading" class="spinner" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
+            <el-button
+              type="primary"
+              native-type="submit"
+              :loading="isLoading"
+              size="large"
+              class="login-btn"
+            >
               <span>{{ isLoading ? '登录中...' : '登 录' }}</span>
-            </button>
+            </el-button>
           </form>
 
           <!-- 分隔线 -->
           <div class="divider">
-            <span>安全加密连接</span>
+            <el-divider>安全加密连接</el-divider>
           </div>
 
           <!-- 测试账号提示（仅开发环境显示） -->
@@ -107,14 +98,46 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
+import { View, Hide } from '@element-plus/icons-vue'
 
 const router = useRouter()
 const auth = useAuthStore()
 const uiStore = useUiStore()
+
+// 内联 SVG 图标组件（保留原有 SVG 样式，无 el-icon 依赖）
+const UserIcon = () => h('svg', {
+  xmlns: 'http://www.w3.org/2000/svg',
+  fill: 'none',
+  viewBox: '0 0 24 24',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  class: 'input-icon-svg',
+}, [
+  h('path', {
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+  }),
+])
+
+const LockIcon = () => h('svg', {
+  xmlns: 'http://www.w3.org/2000/svg',
+  fill: 'none',
+  viewBox: '0 0 24 24',
+  stroke: 'currentColor',
+  'stroke-width': '2',
+  class: 'input-icon-svg',
+}, [
+  h('path', {
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    d: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+  }),
+])
 
 const form = reactive({
   username: '',
@@ -172,7 +195,6 @@ const handleLogin = async () => {
 }
 
 onMounted(() => {
-  // 恢复记住的用户名
   const savedUsername = auth.getRememberedUsername()
   if (savedUsername) {
     form.username = savedUsername
@@ -183,195 +205,320 @@ onMounted(() => {
 
 <style scoped>
 .login-page {
-  @apply min-h-screen relative flex items-center justify-center p-4 overflow-hidden;
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
 }
 
 .login-background {
-  @apply absolute inset-0 -z-10;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
 }
 
 .bg-gradient {
-  @apply absolute inset-0 bg-[#0f0c29];
+  position: absolute;
+  inset: 0;
+  background: #0f0c29;
 }
 
 .bg-gradient::after {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-br from-[#302b63] via-[#24243e] to-[#0f0c29];
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #302b63 0%, #24243e 50%, #0f0c29 100%);
 }
 
 .bg-orb {
-  @apply absolute rounded-full blur-[120px] animate-pulse;
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  animation: pulse 4s ease-in-out infinite;
 }
 
 .orb-1 {
-  @apply -top-40 -left-40 w-[500px] h-[500px] bg-[#7b2ff7]/30;
+  top: -160px;
+  left: -160px;
+  width: 500px;
+  height: 500px;
+  background: rgba(123, 47, 247, 0.3);
 }
 
 .orb-2 {
-  @apply -bottom-40 -right-40 w-[500px] h-[500px] bg-[#f107a3]/20;
+  bottom: -160px;
+  right: -160px;
+  width: 500px;
+  height: 500px;
+  background: rgba(240, 7, 163, 0.2);
   animation-delay: 1.5s;
 }
 
 .orb-3 {
-  @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00d9ff]/10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 600px;
+  background: rgba(0, 217, 255, 0.1);
   animation-delay: 0.8s;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .bg-grid {
-  @apply absolute inset-0 opacity-[0.03];
-  background-image:
-    linear-gradient(#fff 1px, transparent 1px),
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: linear-gradient(#fff 1px, transparent 1px),
     linear-gradient(90deg, #fff 1px, transparent 1px);
   background-size: 60px 60px;
 }
 
 .login-card {
-  @apply relative w-full max-w-[420px];
+  position: relative;
+  width: 100%;
+  max-width: 420px;
 }
 
 .card-glow {
-  @apply absolute -inset-1 bg-gradient-to-r from-[#7b2ff7] via-[#00d9ff] to-[#f107a3] rounded-[28px] blur opacity-25;
+  position: absolute;
+  inset: -4px;
+  background: linear-gradient(135deg, #7b2ff7, #00d9ff, #f107a3);
+  border-radius: 28px;
+  filter: blur(12px);
+  opacity: 0.25;
 }
 
 .card-content {
-  @apply relative bg-white/[0.08] backdrop-blur-2xl border border-white/[0.12] rounded-[24px] shadow-[0_8px_32px_rgba(0,0,0,0.4)] overflow-hidden;
+  position: relative;
+  background: rgba(20, 16, 48, 0.9);
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
 }
 
 .card-header-bar {
-  @apply h-1 bg-gradient-to-r from-[#7b2ff7] via-[#00d9ff] to-[#f107a3];
+  height: 4px;
+  background: linear-gradient(90deg, #7b2ff7, #00d9ff, #f107a3);
 }
 
 .card-body {
-  @apply px-8 pt-8 pb-8;
+  padding: 32px;
 }
 
 .logo-section {
-  @apply flex flex-col items-center mb-8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
 }
 
 .logo {
-  @apply w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7b2ff7] to-[#00d9ff] flex items-center justify-center shadow-[0_4px_24px_rgba(123,47,247,0.4)];
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #7b2ff7, #00d9ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(123, 47, 247, 0.4);
 }
 
 .app-title {
-  @apply mt-5 text-2xl font-bold text-white tracking-wide;
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.05em;
 }
 
 .app-subtitle {
-  @apply mt-1.5 text-sm text-white/40;
+  margin-top: 6px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .login-form {
-  @apply space-y-5;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .form-group {
-  @apply space-y-1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .form-group label {
-  @apply text-xs font-medium text-white/50 uppercase tracking-wider;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.input-wrapper {
-  @apply relative flex items-center;
+/* 登录表单 — 统一继承全局变量，仅覆盖高度（48px 略大于标准 40px） */
+.login-form :deep(.el-input__wrapper) {
+  height: 48px !important;
+  min-height: 48px !important;
 }
 
-.input-icon {
-  @apply absolute left-4 w-4 h-4 text-white/30 pointer-events-none;
+.login-form :deep(.el-input__inner) {
+  height: 48px !important;
+  line-height: 48px !important;
 }
 
-.form-input {
-  @apply w-full h-12 pl-11 pr-11 bg-white/[0.06] border border-white/[0.08] rounded-xl text-sm text-white
-         placeholder-white/25 outline-none transition-all duration-300 focus:bg-white/[0.1]
-         focus:border-[#7b2ff7]/50 focus:shadow-[0_0_0_3px_rgba(123,47,247,0.15)] hover:border-white/[0.15];
+/* 错误态 */
+.login-form :deep(.el-input__wrapper.is-error) {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+}
+.login-form :deep(.el-input__wrapper.is-error.is-focus) {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
 }
 
-.form-input.error {
-  @apply border-red-500/60 focus:border-red-500/60 focus:shadow-[0_0_0_3px_rgba(239,68,68,0.15)];
+/* SVG 图标尺寸 */
+.input-icon-svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* 密码切换按钮 */
+.password-toggle {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.15s ease;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.password-toggle:hover {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Checkbox */
+.form-options :deep(.el-checkbox__label) {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 12px;
+}
+.form-options :deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .error-text {
-  @apply text-xs text-red-400;
-}
-
-.password-toggle {
-  @apply absolute right-4 text-white/30 hover:text-white/60 transition-colors;
+  font-size: 12px;
+  color: #f87171;
 }
 
 .form-options {
-  @apply flex items-center justify-between;
-}
-
-.remember-me {
-  @apply flex items-center gap-2 cursor-pointer select-none;
-}
-
-.remember-me input {
-  @apply sr-only;
-}
-
-.remember-me span {
-  @apply text-xs text-white/40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .forgot-password {
-  @apply text-xs text-white/40 hover:text-white/70 transition-colors;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.15s ease;
 }
 
+.forgot-password:hover {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* 登录按钮 — 渐变 + 动效（全局 .el-button 不含渐变） */
 .login-btn {
-  @apply relative w-full h-12 rounded-xl font-semibold text-sm overflow-hidden mt-1;
+  width: 100%;
+  height: 48px !important;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px !important;
+  border: none !important;
+  background: linear-gradient(135deg, #7b2ff7, #00d9ff) !important;
+  color: white !important;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(123, 47, 247, 0.3);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  margin-top: 4px;
 }
 
 .login-btn::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-r from-[#7b2ff7] via-[#00d9ff] to-[#7b2ff7] bg-[length:200%_100%] transition-all duration-500;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.login-btn:hover {
+  box-shadow: 0 6px 24px rgba(123, 47, 247, 0.4);
+  transform: translateY(-1px);
 }
 
 .login-btn:hover::before {
-  @apply bg-[right];
+  opacity: 1;
 }
 
-.login-btn::after {
-  content: '';
-  @apply absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300;
-}
-
-.login-btn:hover::after {
-  @apply opacity-100;
+.login-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(123, 47, 247, 0.3);
 }
 
 .login-btn span {
-  @apply relative flex items-center justify-center gap-2 text-white z-10;
-}
-
-.spinner {
-  @apply w-4 h-4 animate-spin;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .divider {
-  @apply flex items-center gap-3 my-6;
+  margin: 24px 0;
 }
 
-.divider::before,
-.divider::after {
-  content: '';
-  @apply flex-1 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent;
+.divider :deep(.el-divider) {
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-.divider span {
-  @apply text-xs text-white/20;
+.divider :deep(.el-divider__text) {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.2);
+  font-size: 12px;
 }
 
 .test-account {
-  @apply bg-white/[0.04] border border-white/[0.06] rounded-xl p-4;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
 }
 
 .test-label {
-  @apply text-center text-xs text-white/25 mb-2;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.25);
+  margin-bottom: 8px;
 }
 
 .test-credentials {
-  @apply text-center text-xs text-white/35;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
 }
 </style>

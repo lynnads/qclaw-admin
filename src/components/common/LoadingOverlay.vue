@@ -1,8 +1,11 @@
 <template>
+  <!-- Element Plus Loading 通过指令/服务调用，此组件保留作为兼容层 -->
   <Transition name="fade">
     <div v-if="visible" class="loading-overlay">
       <div class="loading-content">
-        <div class="loading-spinner"></div>
+        <el-icon class="loading-icon" :size="40">
+          <Loading />
+        </el-icon>
         <p v-if="text" class="loading-text">{{ text }}</p>
       </div>
     </div>
@@ -10,6 +13,8 @@
 </template>
 
 <script setup lang="ts">
+import { Loading } from '@element-plus/icons-vue'
+
 interface Props {
   visible: boolean
   text?: string
@@ -22,28 +27,45 @@ withDefaults(defineProps<Props>(), {
 
 <style scoped>
 .loading-overlay {
-  @apply fixed inset-0 z-50 bg-[#1a1630]/80 backdrop-blur-sm flex items-center justify-center;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(26, 22, 48, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .loading-content {
-  @apply flex flex-col items-center gap-3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-.loading-spinner {
-  @apply w-10 h-10 border-2 border-white/10 border-t-[#7b2ff7] rounded-full animate-spin;
+.loading-icon {
+  color: #7b2ff7;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .loading-text {
-  @apply text-sm text-white/40;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  @apply transition-opacity duration-200;
+  transition: opacity 0.2s;
 }
 
 .fade-enter-from,
 .fade-leave-to {
-  @apply opacity-0;
+  opacity: 0;
 }
 </style>

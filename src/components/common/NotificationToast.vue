@@ -1,4 +1,6 @@
 <template>
+  <!-- Element Plus Message/Notification 通过服务调用，此组件保留作为兼容层 -->
+  <!-- 实际通知已通过 uiStore.showSuccess/showError 调用 ElMessage -->
   <div class="notification-container">
     <TransitionGroup name="notification">
       <div
@@ -7,25 +9,15 @@
         class="notification-toast"
         :class="[`notification-${notification.type}`]"
       >
-        <div class="notification-icon">
-          <svg v-if="notification.type === 'success'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-          <svg v-else-if="notification.type === 'error'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          <svg v-else-if="notification.type === 'warning'" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
+        <el-icon class="notification-icon" :size="20">
+          <SuccessFilled v-if="notification.type === 'success'" />
+          <CircleCloseFilled v-else-if="notification.type === 'error'" />
+          <WarningFilled v-else-if="notification.type === 'warning'" />
+          <InfoFilled v-else />
+        </el-icon>
         <span class="notification-message">{{ notification.message }}</span>
         <button class="notification-close" @click="removeNotification(notification.id)">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <el-icon :size="16"><Close /></el-icon>
         </button>
       </div>
     </TransitionGroup>
@@ -35,6 +27,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useUiStore } from '@/stores/ui'
+import {
+  SuccessFilled,
+  CircleCloseFilled,
+  WarningFilled,
+  InfoFilled,
+  Close
+} from '@element-plus/icons-vue'
 
 const uiStore = useUiStore()
 const notifications = computed(() => uiStore.notifications)
@@ -46,56 +45,88 @@ const removeNotification = (id: string) => {
 
 <style scoped>
 .notification-container {
-  @apply fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-sm;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 360px;
 }
 
 .notification-toast {
-  @apply flex items-center gap-3 px-4 py-3 rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.3)] backdrop-blur-xl;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(20px);
 }
 
 .notification-success {
-  @apply bg-emerald-500/20 border border-emerald-500/30 text-emerald-400;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #10b981;
 }
 
 .notification-error {
-  @apply bg-red-500/20 border border-red-500/30 text-red-400;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
 }
 
 .notification-warning {
-  @apply bg-amber-500/20 border border-amber-500/30 text-amber-400;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
 }
 
 .notification-info {
-  @apply bg-blue-500/20 border border-blue-500/30 text-blue-400;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #3b82f6;
 }
 
 .notification-icon {
-  @apply flex-shrink-0;
+  flex-shrink: 0;
 }
 
 .notification-message {
-  @apply flex-1 text-sm;
+  flex: 1;
+  font-size: 14px;
 }
 
 .notification-close {
-  @apply flex-shrink-0 p-1 rounded hover:bg-white/10 transition-colors;
+  flex-shrink: 0;
+  padding: 4px;
+  border-radius: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
 }
 
-/* Transition animations */
+.notification-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .notification-enter-active,
 .notification-leave-active {
-  @apply transition-all duration-300;
+  transition: all 0.3s;
 }
 
 .notification-enter-from {
-  @apply opacity-0 translate-x-full;
+  opacity: 0;
+  transform: translateX(100%);
 }
 
 .notification-leave-to {
-  @apply opacity-0 translate-x-full;
+  opacity: 0;
+  transform: translateX(100%);
 }
 
 .notification-move {
-  @apply transition-transform duration-300;
+  transition: transform 0.3s;
 }
 </style>

@@ -29,11 +29,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Dashboard.vue'),
         meta: { title: '仪表盘', icon: 'Dashboard' }
       },
-      {
-        path: 'user',
-        component: () => import('@/views/UserList.vue'),
-        meta: { title: '用户管理', icon: 'User' }
-      },
+
       {
         path: 'project',
         component: () => import('@/views/ProjectAnalyzer.vue'),

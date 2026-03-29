@@ -137,8 +137,6 @@
       </div>
     </Transition>
 
-    <!-- 通知组件 -->
-    <NotificationToast />
   </div>
 </template>
 
@@ -147,7 +145,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
-import { NotificationToast } from '@/components'
+
 
 const route = useRoute()
 const router = useRouter()
@@ -170,11 +168,6 @@ const menuItems = [
     path: '/dashboard',
     title: '仪表盘',
     icon: ['M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z'],
-  },
-  {
-    path: '/user',
-    title: '用户管理',
-    icon: ['M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
   },
   {
     path: '/project',

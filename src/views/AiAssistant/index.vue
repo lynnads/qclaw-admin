@@ -83,14 +83,25 @@
                 </div>
                 <div class="form-group">
                   <label>策略类型</label>
-                  <select v-model="quantForm.strategyType" class="form-select">
-                    <option value="">请选择策略</option>
-                    <option value="双均线">双均线策略</option>
-                    <option value="MACD">MACD策略</option>
-                    <option value="RSI">RSI超买超卖</option>
-                    <option value="市盈率单因子">市盈率单因子</option>
-                    <option value="技术指标">布林带策略</option>
-                  </select>
+                  <el-select 
+                    v-model="quantForm.strategyType" 
+                    placeholder="请选择策略"
+                    class="w-full"
+                    size="medium"
+                    :popper-class="'quant-strategy-select'"
+                  >
+                    <el-option 
+                      v-for="item in strategyOptions" 
+                      :key="item.value" 
+                      :label="item.label" 
+                      :value="item.value"
+                    >
+                      <div class="strategy-option">
+                        <span class="strategy-label">{{ item.label }}</span>
+                        <span class="strategy-desc">{{ item.desc }}</span>
+                      </div>
+                    </el-option>
+                  </el-select>
                 </div>
               </div>
               <div class="form-row">
@@ -346,6 +357,15 @@ const typeOptions = [
   { value: 'document', label: '文档' },
 ]
 
+// 策略选项
+const strategyOptions = [
+  { value: '双均线', label: '双均线策略', desc: '5日/20日均线金叉死叉' },
+  { value: 'MACD', label: 'MACD策略', desc: 'DIF/DEA交叉信号' },
+  { value: 'RSI', label: 'RSI超买超卖', desc: 'RSI<30买入 >70卖出' },
+  { value: '市盈率单因子', label: '市盈率单因子', desc: 'PE<10买入 >20卖出' },
+  { value: '技术指标', label: '布林带策略', desc: '价格突破上下轨' },
+]
+
 // 占位符
 const placeholderText = computed(() => {
   const map: Record<string, string> = {
@@ -547,6 +567,19 @@ onMounted(() => {
 
 .form-row { @apply grid grid-cols-2 gap-3; }
 
+/* 下拉选项样式 */
+.strategy-option {
+  @apply flex flex-col gap-1;
+}
+
+.strategy-label {
+  @apply text-sm text-white/80;
+}
+
+.strategy-desc {
+  @apply text-xs text-white/40;
+}
+
 .form-group { @apply flex flex-col gap-1.5; }
 
 .form-group label { @apply text-xs text-white/40 font-medium; }
@@ -555,6 +588,51 @@ onMounted(() => {
   @apply h-10 px-3 rounded-xl bg-white/[0.06] border border-white/[0.08]
          text-sm text-white placeholder-white/25 outline-none
          focus:bg-white/[0.09] focus:border-[#7b2ff7]/40 transition-all duration-200;
+}
+
+/* Element Plus Select 与 input 保持一致 */
+.quant-form :deep(.el-select) {
+  --el-select-border-color-hover: rgba(123, 47, 247, 0.4);
+  width: 100%;
+}
+
+.quant-form :deep(.el-select .el-input__wrapper) {
+  height: 40px !important;
+  padding: 0 12px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: none !important;
+}
+
+.quant-form :deep(.el-select .el-input__wrapper:hover) {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.quant-form :deep(.el-select .el-input__wrapper.is-focus) {
+  background: rgba(255, 255, 255, 0.09) !important;
+  border-color: rgba(123, 47, 247, 0.4) !important;
+  box-shadow: none !important;
+}
+
+.quant-form :deep(.el-select .el-input__inner) {
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 14px !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.quant-form :deep(.el-select .el-input__inner::placeholder) {
+  color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.quant-form :deep(.el-select .el-input__suffix) {
+  height: 38px !important;
+}
+
+.quant-form :deep(.el-select .el-icon) {
+  color: rgba(255, 255, 255, 0.3) !important;
 }
 
 .form-actions { @apply flex items-center gap-3 pt-2; }
@@ -694,4 +772,35 @@ onMounted(() => {
 .fade-enter-active, .fade-leave-active { @apply transition-all duration-300; }
 .fade-enter-from { @apply opacity-0; }
 .fade-leave-to { @apply opacity-0; }
+</style>
+
+<!-- 全局样式：下拉框弹出层 -->
+<style>
+/* Element Plus Select 下拉框全局样式 */
+.quant-strategy-select {
+  background: #1a1a2e !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+.quant-strategy-select .el-select-dropdown__item {
+  height: auto !important;
+  padding: 10px 16px !important;
+  line-height: 1.4 !important;
+}
+
+.quant-strategy-select .el-select-dropdown__item.is-selected {
+  background: rgba(123, 47, 247, 0.15) !important;
+  color: #00d9ff !important;
+}
+
+.quant-strategy-select .el-select-dropdown__item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.quant-strategy-select .el-popper__arrow::before {
+  background: #1a1a2e !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
 </style>
